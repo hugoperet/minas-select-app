@@ -3123,25 +3123,163 @@ body{
       <label class="cert-lb" data-v="Orgânico" onclick="toggleCert(this)">🌱 Orgânico</label>
     </div>
 
-    <!-- Peneiras -->
-    <div class="blk" style="margin-bottom:8px">Classificação de peneiras (%) — opcional</div>
-    <div class="form-row-4" style="margin-bottom:4px">
-      <div class="campo"><label>Pen. 18</label><input type="number" class="form-input" id="clf-p18" placeholder="0" step="0.1" oninput="calcPenClassif()"></div>
-      <div class="campo"><label>Pen. 17</label><input type="number" class="form-input" id="clf-p17" placeholder="0" step="0.1" oninput="calcPenClassif()"></div>
-      <div class="campo"><label>Pen. 16</label><input type="number" class="form-input" id="clf-p16" placeholder="0" step="0.1" oninput="calcPenClassif()"></div>
-      <div class="campo"><label>Pen. MK</label><input type="number" class="form-input" id="clf-pmk" placeholder="0" step="0.1" oninput="calcPenClassif()"></div>
-      <div class="campo"><label>Pen. 15</label><input type="number" class="form-input" id="clf-p15" placeholder="0" step="0.1" oninput="calcPenClassif()"></div>
-      <div class="campo"><label>Pen. 14</label><input type="number" class="form-input" id="clf-p14" placeholder="0" step="0.1" oninput="calcPenClassif()"></div>
-      <div class="campo"><label>Fundo 13</label><input type="number" class="form-input" id="clf-p13" placeholder="0" step="0.1" oninput="calcPenClassif()"></div>
-      <div class="campo"><label>F10</label><input type="number" class="form-input" id="clf-p10" placeholder="0" step="0.1" oninput="calcPenClassif()"></div>
-      <div class="campo"><label>Fundo</label><input type="number" class="form-input" id="clf-pfundo" placeholder="0" step="0.1" oninput="calcPenClassif()"></div>
-      <div class="campo"><label>Impureza</label><input type="number" class="form-input" id="clf-pimp" placeholder="0" step="0.1"></div>
-      <div class="campo"><label>Broca</label><input type="number" class="form-input" id="clf-pbroca" placeholder="0" step="0.1"></div>
-      <div class="campo"><label>Quebra</label><input type="number" class="form-input" id="clf-pquebra" placeholder="0" step="0.1"></div>
+    <!-- Modelo de classificação -->
+    <div class="blk" style="margin-bottom:8px">Modelo de classificação</div>
+    <div class="chip-group" id="clf-modo-chips" style="margin-bottom:16px">
+      <div class="chip-sel on" data-modo="bica" onclick="setClfModo(this,'bica')">🏭 Bica Corrida</div>
+      <div class="chip-sel" data-modo="peneiras" onclick="setClfModo(this,'peneiras')">📊 Peneiras e Escolhas</div>
     </div>
-    <div class="pen-total" style="margin-bottom:16px">
-      <span class="pen-total-l">Total peneiras</span>
-      <span class="pen-total-n" id="clf-total-pen">—</span>
+
+    <!-- ── BICA CORRIDA ── -->
+    <div id="clf-bica-section">
+      <!-- Sub-tabs dentro da Bica Corrida -->
+      <div style="display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:14px">
+        <button id="clf-tab-pen-btn" onclick="setClfSubTab('peneiras')" style="flex:1;padding:9px 0;font-size:12px;font-weight:700;color:var(--g-mid);background:none;border:none;border-bottom:2.5px solid var(--g-mid);cursor:pointer;font-family:var(--fb);margin-bottom:-1.5px">📊 Peneiras</button>
+        <button id="clf-tab-esc-btn" onclick="setClfSubTab('escolhas')" style="flex:1;padding:9px 0;font-size:12px;font-weight:700;color:var(--t3);background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;font-family:var(--fb);margin-bottom:-1.5px">🔬 Escolhas/Defeitos</button>
+      </div>
+
+      <!-- ▸ Sub-aba PENEIRAS -->
+      <div id="clf-sub-peneiras">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Distribua 100% entre as peneiras (P18, P17, P16, F13, P14/15/MK)</div>
+        <div class="form-row-4" style="margin-bottom:10px">
+          <div class="campo"><label>Pen. 18</label><input type="number" class="form-input" id="clf-p18" placeholder="0" step="0.1" oninput="calcBica()"></div>
+          <div class="campo"><label>Pen. 17</label><input type="number" class="form-input" id="clf-p17" placeholder="0" step="0.1" oninput="calcBica()"></div>
+          <div class="campo"><label>Pen. 16</label><input type="number" class="form-input" id="clf-p16" placeholder="0" step="0.1" oninput="calcBica()"></div>
+          <div class="campo"><label>Fundo 13</label><input type="number" class="form-input" id="clf-p13" placeholder="0" step="0.1" oninput="calcBica()"></div>
+        </div>
+        <!-- P14/15/MK: calculado automaticamente (= 100 − P18 − P17 − P16 − F13) -->
+        <div style="background:var(--g-pale);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--g-dark)">P14/15/MK <span style="font-weight:400;color:var(--t3);font-size:10px">(calculado)</span></div>
+              <div style="font-size:10px;color:var(--t3);margin-top:2px">= 100 − P18 − P17 − P16 − F13</div>
+            </div>
+            <span style="font-size:16px;font-weight:800;color:var(--g-mid);min-width:48px;text-align:right" id="clf-p14mk-auto">—</span>
+          </div>
+        </div>
+        <!-- Total -->
+        <div class="pen-total" style="margin-bottom:6px">
+          <span class="pen-total-l">Total peneiras (deve fechar 100%)</span>
+          <span class="pen-total-n" id="clf-total-pen">—</span>
+        </div>
+        <div id="clf-aviso-100" style="display:none;background:#FEF3C7;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;color:#92400E;margin-bottom:4px">
+          ⚠️ A soma das peneiras ultrapassa 100%. Verifique os dados.
+        </div>
+      </div>
+
+      <!-- ▸ Sub-aba ESCOLHAS/DEFEITOS -->
+      <div id="clf-sub-escolhas" style="display:none">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:12px">Catação, fundo e impurezas formam a <strong>Quebra Total</strong> que será descontada do aproveitamento.</div>
+
+        <!-- Catação -->
+        <div class="blk" style="margin-bottom:8px">Catação</div>
+        <div class="campo" style="margin-bottom:12px">
+          <label>Catação total <span style="font-weight:400;font-size:10px;color:var(--t3)">(%)</span></label>
+          <input type="number" class="form-input" id="clf-catacao" placeholder="Ex: 12" step="0.1" oninput="calcBicaEscolhas()">
+        </div>
+
+        <!-- Fundo e Impurezas físicas -->
+        <div class="blk" style="margin-bottom:8px">Fundo e Impurezas físicas</div>
+        <div class="form-row-4" style="margin-bottom:12px">
+          <div class="campo"><label>Fundo (P10)</label><input type="number" class="form-input" id="clf-fundo-p10" placeholder="0" step="0.1" oninput="calcBicaEscolhas()"></div>
+          <div class="campo"><label>Palha</label><input type="number" class="form-input" id="clf-imp-palha2" placeholder="0" step="0.1" oninput="calcBicaEscolhas()"></div>
+          <div class="campo"><label>Pau</label><input type="number" class="form-input" id="clf-imp-pau2" placeholder="0" step="0.1" oninput="calcBicaEscolhas()"></div>
+          <div class="campo"><label>Pedra</label><input type="number" class="form-input" id="clf-imp-pedra2" placeholder="0" step="0.1" oninput="calcBicaEscolhas()"></div>
+        </div>
+
+        <!-- PVA — informativos, não entram na Quebra -->
+        <div class="blk" style="margin-bottom:8px">PVA <span style="font-weight:400;font-size:10px;color:var(--t3)">(informativo — não entra na Quebra)</span></div>
+        <div class="form-row-4" style="margin-bottom:14px">
+          <div class="campo"><label>Pretos %</label><input type="number" class="form-input" id="clf-pva-p" placeholder="0" step="0.1"></div>
+          <div class="campo"><label>Verdes %</label><input type="number" class="form-input" id="clf-pva-v" placeholder="0" step="0.1"></div>
+          <div class="campo"><label>Ardidos %</label><input type="number" class="form-input" id="clf-pva-a" placeholder="0" step="0.1"></div>
+        </div>
+
+        <!-- Quebra Total e Aproveitamento — calculados -->
+        <div style="background:var(--surface2);border-radius:10px;padding:12px 14px;margin-bottom:8px;font-size:13px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="color:var(--t2)">Catação</span>
+            <span id="clf-quebra-catacao" style="font-weight:700">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="color:var(--t2)">Fundo P10</span>
+            <span id="clf-quebra-fundo" style="font-weight:700">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+            <span style="color:var(--t2)">Impurezas (Palha + Pau + Pedra)</span>
+            <span id="clf-quebra-imp" style="font-weight:700">—</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+            <span style="font-weight:800;color:var(--red,#DC2626)">⬇ Total de Quebra</span>
+            <span id="clf-quebra-total" style="font-weight:800;font-size:15px;color:var(--red,#DC2626)">—</span>
+          </div>
+        </div>
+        <div style="background:var(--g-pale);border-radius:10px;padding:12px 14px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--g-dark)">✅ Aproveitamento</div>
+            <div style="font-size:10px;color:var(--t3);margin-top:1px">= 100% − Total de Quebra</div>
+          </div>
+          <span id="clf-aproveit-bica" style="font-size:18px;font-weight:800;color:var(--g-mid)">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PENEIRAS E ESCOLHAS ── -->
+    <div id="clf-peneiras-section" style="display:none">
+      <div class="blk" style="margin-bottom:8px">Peneiras <span style="font-weight:400;font-size:11px;color:var(--t3)">(% de 100g)</span></div>
+      <div class="form-row-4" style="margin-bottom:8px">
+        <div class="campo"><label>Pen. 18</label><input type="number" class="form-input" id="clf-pp18" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Pen. 17</label><input type="number" class="form-input" id="clf-pp17" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Pen. 16</label><input type="number" class="form-input" id="clf-pp16" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Pen. 15</label><input type="number" class="form-input" id="clf-pp15" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Pen. 14</label><input type="number" class="form-input" id="clf-pp14" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Pen. MK</label><input type="number" class="form-input" id="clf-ppmk" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+      </div>
+
+      <div class="blk" style="margin:4px 0 8px">Composição de Impurezas</div>
+      <div class="form-row-4" style="margin-bottom:4px">
+        <div class="campo"><label>Fundo P10</label><input type="number" class="form-input" id="clf-imp-p10" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Palha</label><input type="number" class="form-input" id="clf-imp-palha" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Pau</label><input type="number" class="form-input" id="clf-imp-pau" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Torrão</label><input type="number" class="form-input" id="clf-imp-torrao" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Marinheiro</label><input type="number" class="form-input" id="clf-imp-mar" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Coco</label><input type="number" class="form-input" id="clf-imp-coco" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:12px;font-weight:700;color:var(--t2)">Total Impureza (auto)</span>
+        <span style="font-size:14px;font-weight:800;color:var(--red,#DC2626)" id="clf-imp-total">0%</span>
+      </div>
+
+      <div class="blk" style="margin:4px 0 8px">PVA — Defeitos intrínsecos</div>
+      <div class="form-row-4" style="margin-bottom:12px">
+        <div class="campo"><label>Pretos (%)</label><input type="number" class="form-input" id="clf-pva-p" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Verdes (%)</label><input type="number" class="form-input" id="clf-pva-v" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+        <div class="campo"><label>Ardidos (%)</label><input type="number" class="form-input" id="clf-pva-a" placeholder="0" step="0.1" oninput="calcPeneiras()"></div>
+      </div>
+
+      <!-- Aproveitamento -->
+      <div style="background:var(--g-pale);border-radius:10px;padding:12px 14px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:12px;font-weight:700;color:var(--t2)">Aproveitamento</span>
+          <span style="font-size:15px;font-weight:800;color:var(--g-mid)" id="clf-aproveit">—</span>
+        </div>
+        <div style="font-size:11px;color:var(--t3)">= Total − Fundo P10 − Total Impureza</div>
+      </div>
+
+      <!-- Alerta Escolha/Kg -->
+      <div id="clf-unidade-kg-banner" style="display:none;background:#FEF9C3;border-radius:10px;padding:10px 14px;margin-bottom:10px">
+        <div style="font-size:12px;font-weight:700;color:#92400E">⚠️ Aproveitamento abaixo de 80%</div>
+        <div style="font-size:11px;color:#B45309;margin-top:2px">Considere negociar em <strong>Kg</strong> (R$/kg) em vez de Saca (60kg)</div>
+      </div>
+
+      <!-- Total + alerta 100 -->
+      <div class="pen-total" style="margin-bottom:6px">
+        <span class="pen-total-l">Total (deve fechar 100g)</span>
+        <span class="pen-total-n" id="clf-total-pen-pen">—</span>
+      </div>
+      <div id="clf-aviso-100-pen" style="display:none;background:#FEF3C7;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;color:#92400E;margin-bottom:12px">
+        ⚠️ A soma das peneiras e catação não fecha em 100g. Verifique os dados.
+      </div>
     </div>
 
     <!-- Qualidade / tipo -->
@@ -3552,6 +3690,11 @@ body{
       <div class="form-divider"></div>
       <div class="form-section-label">Oferta</div>
 
+      <div class="form-field">
+        <label class="form-label">Sacas <span style="font-weight:400;font-size:10px;color:var(--t3)">(pré-preenchido com saldo disponível)</span></label>
+        <input class="form-input" id="amostra-sacas" type="text" placeholder="—" inputmode="numeric" autocomplete="off">
+      </div>
+
       <div class="form-row">
         <div class="form-field">
           <label class="form-label">Preço sugerido / sc</label>
@@ -3834,53 +3977,6 @@ body{
       </div>
 
       <div class="form-divider"></div>
-      <div class="form-section-label">Qualidade</div>
-
-      <!-- Tipo COB + Bebida -->
-      <div class="form-row">
-        <div class="form-field">
-          <label class="form-label">Tipo COB</label>
-          <select class="form-select" id="lote-tipo-cob">
-            <option value="">Selecionar</option>
-            <option>Tipo 2</option>
-            <option>Tipo 2/3</option>
-            <option>Tipo 3</option>
-            <option>Tipo 3/4</option>
-            <option>Tipo 4</option>
-            <option>Tipo 4/5</option>
-            <option>Tipo 5</option>
-            <option>Tipo 5/6</option>
-            <option>Tipo 6</option>
-            <option>Tipo 7</option>
-          </select>
-        </div>
-        <div class="form-field">
-          <label class="form-label">Bebida</label>
-          <select class="form-select" id="lote-bebida">
-            <option value="">Selecionar</option>
-            <option>Estritamente Mole</option>
-            <option>Mole</option>
-            <option>Apenas Mole</option>
-            <option>Duro</option>
-            <option>Riado</option>
-            <option>Rio</option>
-            <option>Rio Zona</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Umidade + Cup Score -->
-      <div class="form-row">
-        <div class="form-field">
-          <label class="form-label">Umidade <span style="font-weight:400;text-transform:none;letter-spacing:0">(%)</span></label>
-          <input class="form-input" id="lote-umidade" type="text" placeholder="Ex: 11.5" inputmode="decimal" autocomplete="off">
-        </div>
-        <div class="form-field">
-          <label class="form-label">Cup Score <span style="font-weight:400;text-transform:none;letter-spacing:0">(especiais)</span></label>
-          <input class="form-input" id="lote-cupscore" type="text" placeholder="Ex: 85.5" inputmode="decimal" autocomplete="off">
-        </div>
-      </div>
-
       <div class="form-divider"></div>
       <div class="form-section-label">Certificações</div>
 
@@ -3939,20 +4035,26 @@ body{
       <div class="form-divider"></div>
       <div class="form-section-label">Partes</div>
 
-      <div class="form-field">
-        <label class="form-label">Comprador <span>*</span></label>
-        <select class="form-select" id="ct-comprador">
-          <option value="">Selecionar comprador</option>
-          <option>CAFESALL</option>
-          <option>CARMO COFFEES</option>
-          <option>COCATREL</option>
-          <option>COOCARIVE</option>
-          <option>LEGENDER COFFEES</option>
-          <option>MOINHO TRADE</option>
-          <option>OURO MINAS</option>
-          <option>STONEX FINANCIAL</option>
-          <option>LOUIS DREYFUS</option>
-        </select>
+      <div class="form-row">
+        <div class="form-field" style="flex:2">
+          <label class="form-label">Comprador <span>*</span></label>
+          <select class="form-select" id="ct-comprador">
+            <option value="">Selecionar comprador</option>
+            <option>CAFESALL</option>
+            <option>CARMO COFFEES</option>
+            <option>COCATREL</option>
+            <option>COOCARIVE</option>
+            <option>LEGENDER COFFEES</option>
+            <option>MOINHO TRADE</option>
+            <option>OURO MINAS</option>
+            <option>STONEX FINANCIAL</option>
+            <option>LOUIS DREYFUS</option>
+          </select>
+        </div>
+        <div class="form-field" style="flex:1">
+          <label class="form-label">Nº Compra</label>
+          <input class="form-input" id="ct-num-compra" type="text" placeholder="Ex: OC-0412">
+        </div>
       </div>
 
       <div class="form-field">
@@ -4040,11 +4142,14 @@ body{
       <div class="form-divider"></div>
       <div class="form-section-label">Pagamento</div>
 
-      <div class="chip-group" id="ct-pagto" style="margin-bottom:14px">
-        <div class="chip-sel on" onclick="toggleChipExcl(this,'ct-pagto')">À vista</div>
-        <div class="chip-sel" onclick="toggleChipExcl(this,'ct-pagto')">30 dias</div>
-        <div class="chip-sel" onclick="toggleChipExcl(this,'ct-pagto')">60 dias</div>
-        <div class="chip-sel" onclick="toggleChipExcl(this,'ct-pagto')">Parcelado</div>
+      <div class="chip-group" id="ct-pagto" style="margin-bottom:10px">
+        <div class="chip-sel on" onclick="toggleChipExcl(this,'ct-pagto');document.getElementById('ct-pagto-dias-row').style.display='none'">À Vista</div>
+        <div class="chip-sel" onclick="toggleChipExcl(this,'ct-pagto');document.getElementById('ct-pagto-dias-row').style.display='none'">Contra Retirada</div>
+        <div class="chip-sel" onclick="toggleChipExcl(this,'ct-pagto');document.getElementById('ct-pagto-dias-row').style.display='flex'">X Dias após descarga</div>
+      </div>
+      <div id="ct-pagto-dias-row" style="display:none;gap:10px;align-items:center;margin-bottom:14px">
+        <input class="form-input" id="ct-pagto-dias" type="number" placeholder="Ex: 30" inputmode="numeric" style="width:90px;flex-shrink:0">
+        <span style="font-size:13px;color:var(--t2)">dias após descarga no armazém de destino</span>
       </div>
 
       <div class="form-row">
@@ -4077,11 +4182,6 @@ body{
 
       <div class="form-divider"></div>
       <div class="form-section-label">Dados do comprador</div>
-
-      <div class="form-field">
-        <label class="form-label">Nº Compra do Comprador</label>
-        <input class="form-input" id="ct-num-compra" type="text" placeholder="Ex: OC-2026-0412">
-      </div>
 
       <div class="form-field">
         <label class="form-label">Instrução de Faturamento</label>
@@ -5489,10 +5589,6 @@ function salvarLote() {
   const safra    = document.getElementById('lote-safra').value;
   const armazem  = document.getElementById('lote-armazem').value;
   const obs      = document.getElementById('lote-obs').value.trim();
-  const tipoCOB  = document.getElementById('lote-tipo-cob').value;
-  const bebida   = document.getElementById('lote-bebida').value;
-  const umidade  = document.getElementById('lote-umidade').value.trim();
-  const cupScore = document.getElementById('lote-cupscore').value.trim();
 
   // Tipo de café e processamento (chips single)
   const tipoCafeEl  = document.querySelector('#lote-tipo-cafe .chip-sel.on');
@@ -5510,17 +5606,12 @@ function salvarLote() {
   const cod = String(loteCounter).padStart(3,'0') + '/' + ano;
   const certs = [...document.querySelectorAll('#lote-certs .chip-sel.on')].map(c => c.textContent.trim()).join(' · ');
 
-  // Montar linha de qualidade para o card
-  const qualParts = [tipoCOB, bebida].filter(Boolean);
-  if (umidade) qualParts.push(umidade + '% umid.');
-  const qualLabel = qualParts.join(' · ');
 
   // Montar chips de tags do card
   const tagChips = [];
   if (tipoCafe) tagChips.push(`<span class="chip cn">${tipoCafe}</span>`);
   if (processo) tagChips.push(`<span class="chip cn">${processo}</span>`);
   if (safra)    tagChips.push(`<span class="chip cn">Safra ${safra}</span>`);
-  if (cupScore) tagChips.push(`<span class="chip" style="background:#FEF9C3;color:#92400E;font-weight:700">☕ ${cupScore} pts</span>`);
   if (certs) certs.split(' · ').forEach(c => tagChips.push(`<span class="chip cb">${c}</span>`));
 
   // Inserir card no topo da lista
@@ -5536,7 +5627,7 @@ function salvarLote() {
     id: loteId, cod, nome, vendedor: vend, origem: armazem || '',
     total: parseInt(sacas) || 0, disp: parseInt(sacas) || 0,
     sacasDisp: sacas, safra, status: 'disp',
-    tipoCafe, processo, tipoCOB, bebida, umidade, cupScore, obs,
+    tipoCafe, processo, obs,
     certs: certs || ''
   };
   card.onclick = function(){ abrirLoteDetalhe(loteId); };
@@ -5558,7 +5649,6 @@ function salvarLote() {
       </div>
       <span class="vol-total">${certs || 'Sem certificações'}</span>
     </div>
-    ${qualLabel ? `<div style="font-size:12px;color:var(--t2);margin-top:6px;font-family:var(--fm)">${qualLabel}</div>` : ''}
     <div class="lote-tags">
       <span class="chip cg">● Disponível</span>
       ${tagChips.join('')}
@@ -5589,10 +5679,10 @@ function salvarLote() {
   toast('✅ Lote ' + cod + ' · "' + nome + '" salvo — ' + sacas + ' sacas');
 }
 function limparFormLote() {
-  ['lote-nome','lote-sacas','lote-obs','lote-umidade','lote-cupscore'].forEach(id => {
+  ['lote-nome','lote-sacas','lote-obs'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = '';
   });
-  ['lote-vendedor','lote-armazem','lote-tipo-cob','lote-bebida'].forEach(id => {
+  ['lote-vendedor','lote-armazem'].forEach(id => {
     const el = document.getElementById(id); if(el) el.selectedIndex = 0;
   });
   document.getElementById('lote-safra').selectedIndex = 2;
@@ -5726,15 +5816,128 @@ function previewFoto(input, labelId) {
 function toggleCert(el) {
   el.classList.toggle('on');
 }
-function calcPenClassif() {
-  const ids = ['clf-p18','clf-p17','clf-p16','clf-pmk','clf-p15','clf-p14','clf-p13','clf-p10','clf-pfundo'];
-  const t = ids.reduce((s, id) => s + (parseFloat(document.getElementById(id)?.value) || 0), 0);
-  const el = document.getElementById('clf-total-pen');
-  if (el) {
-    el.textContent = t.toFixed(1) + '%';
-    el.style.color = t > 100 ? 'var(--red)' : (t >= 99 && t <= 101) ? 'var(--brand-primary)' : 'var(--t2)';
+// Trocar modo Bica Corrida / Peneiras e Escolhas
+function setClfModo(el, modo) {
+  document.querySelectorAll('#clf-modo-chips .chip-sel').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('clf-bica-section').style.display    = modo === 'bica'     ? '' : 'none';
+  document.getElementById('clf-peneiras-section').style.display = modo === 'peneiras' ? '' : 'none';
+}
+
+// Trocar sub-aba dentro da Bica Corrida
+function setClfSubTab(tab) {
+  var isPen = tab === 'peneiras';
+  document.getElementById('clf-sub-peneiras').style.display = isPen ? '' : 'none';
+  document.getElementById('clf-sub-escolhas').style.display = isPen ? 'none' : '';
+  var penBtn = document.getElementById('clf-tab-pen-btn');
+  var escBtn = document.getElementById('clf-tab-esc-btn');
+  if (penBtn) { penBtn.style.color = isPen ? 'var(--g-mid)' : 'var(--t3)'; penBtn.style.borderBottomColor = isPen ? 'var(--g-mid)' : 'transparent'; }
+  if (escBtn) { escBtn.style.color = isPen ? 'var(--t3)' : 'var(--g-mid)'; escBtn.style.borderBottomColor = isPen ? 'transparent' : 'var(--g-mid)'; }
+  // Atualiza referência de catação na aba escolhas
+  if (!isPen) {
+    var cat = parseFloat(document.getElementById('clf-catacao')?.value) || 0;
+    var ref = document.getElementById('clf-catacao-ref');
+    if (ref) ref.textContent = cat > 0 ? cat.toFixed(1) + '%' : 'não informada';
   }
 }
+
+// ── BICA CORRIDA: P14/15/MK = 100 − P18 − P17 − P16 − F13 (peneiras apenas) ──
+function calcBica() {
+  var p18  = parseFloat(document.getElementById('clf-p18')?.value) || 0;
+  var p17  = parseFloat(document.getElementById('clf-p17')?.value) || 0;
+  var p16  = parseFloat(document.getElementById('clf-p16')?.value) || 0;
+  var p13  = parseFloat(document.getElementById('clf-p13')?.value) || 0;
+  var somaExplicita = p18 + p17 + p16 + p13;
+  var p14mk = Math.max(0, 100 - somaExplicita);
+  var total = somaExplicita + p14mk; // sempre = 100 quando p14mk >= 0
+
+  // Exibir P14/15/MK calculado
+  var mkEl = document.getElementById('clf-p14mk-auto');
+  if (mkEl) {
+    mkEl.textContent = p14mk.toFixed(1) + '%';
+    mkEl.style.color = somaExplicita > 100.1 ? 'var(--red,#DC2626)' : 'var(--g-mid)';
+  }
+
+  // Total
+  var totEl = document.getElementById('clf-total-pen');
+  if (totEl) {
+    totEl.textContent = total.toFixed(1) + '%';
+    totEl.style.color = (total >= 99.9 && total <= 100.1) ? 'var(--brand-primary)' : 'var(--t2)';
+  }
+
+  // Alerta: só quando soma > 100
+  var aviso = document.getElementById('clf-aviso-100');
+  if (aviso) aviso.style.display = (somaExplicita > 100.1) ? '' : 'none';
+}
+
+// ── BICA CORRIDA: Aba Escolhas — Quebra = Catação + Fundo P10 + Palha + Pau + Pedra ──
+function calcBicaEscolhas() {
+  var cat    = parseFloat(document.getElementById('clf-catacao')?.value)     || 0;
+  var fundo  = parseFloat(document.getElementById('clf-fundo-p10')?.value)   || 0;
+  var palha  = parseFloat(document.getElementById('clf-imp-palha2')?.value)  || 0;
+  var pau    = parseFloat(document.getElementById('clf-imp-pau2')?.value)    || 0;
+  var pedra  = parseFloat(document.getElementById('clf-imp-pedra2')?.value)  || 0;
+  var impSum = palha + pau + pedra;
+  var quebra = cat + fundo + impSum;
+  var aproveit = Math.max(0, 100 - quebra);
+
+  var fmt = function(v) { return v > 0 ? v.toFixed(1) + '%' : '0%'; };
+
+  // Linhas do resumo
+  var qCat  = document.getElementById('clf-quebra-catacao');
+  var qFund = document.getElementById('clf-quebra-fundo');
+  var qImp  = document.getElementById('clf-quebra-imp');
+  var qTot  = document.getElementById('clf-quebra-total');
+  var qApr  = document.getElementById('clf-aproveit-bica');
+
+  if (qCat)  qCat.textContent  = fmt(cat);
+  if (qFund) qFund.textContent = fmt(fundo);
+  if (qImp)  qImp.textContent  = fmt(impSum);
+  if (qTot) {
+    qTot.textContent = fmt(quebra);
+    qTot.style.color = quebra > 20 ? 'var(--red,#DC2626)' : 'var(--red,#DC2626)'; // sempre vermelho
+  }
+  if (qApr) {
+    qApr.textContent = aproveit.toFixed(1) + '%';
+    qApr.style.color = aproveit < 80 ? 'var(--red,#DC2626)' : 'var(--g-mid)';
+  }
+}
+
+// ── PENEIRAS E ESCOLHAS: calcular impureza total, aproveitamento, validar 100 ──
+function calcPeneiras() {
+  var penIds = ['clf-pp18','clf-pp17','clf-pp16','clf-pp15','clf-pp14','clf-ppmk'];
+  var penSum = penIds.reduce(function(s, id) { return s + (parseFloat(document.getElementById(id)?.value) || 0); }, 0);
+  var impIds = ['clf-imp-p10','clf-imp-palha','clf-imp-pau','clf-imp-torrao','clf-imp-mar','clf-imp-coco'];
+  var impSum = impIds.reduce(function(s, id) { return s + (parseFloat(document.getElementById(id)?.value) || 0); }, 0);
+  var fundoP10 = parseFloat(document.getElementById('clf-imp-p10')?.value) || 0;
+  var total = penSum + impSum;
+  var aproveit = Math.max(0, 100 - fundoP10 - impSum);
+
+  // Impureza total
+  var impTotEl = document.getElementById('clf-imp-total');
+  if (impTotEl) impTotEl.textContent = impSum.toFixed(1) + '%';
+
+  // Aproveitamento
+  var aprovEl = document.getElementById('clf-aproveit');
+  if (aprovEl) aprovEl.textContent = aproveit.toFixed(1) + '%';
+
+  // Banner Kg se aproveitamento < 80%
+  var kgBanner = document.getElementById('clf-unidade-kg-banner');
+  if (kgBanner) kgBanner.style.display = (aproveit > 0 && aproveit < 80) ? '' : 'none';
+
+  // Total
+  var totEl = document.getElementById('clf-total-pen-pen');
+  if (totEl) {
+    totEl.textContent = total.toFixed(1) + '%';
+    totEl.style.color = (total >= 99 && total <= 101) ? 'var(--brand-primary)' : (total > 101 ? 'var(--red,#DC2626)' : 'var(--t2)');
+  }
+  // Alerta 100
+  var aviso = document.getElementById('clf-aviso-100-pen');
+  if (aviso) aviso.style.display = (total > 0 && (total < 99 || total > 101)) ? '' : 'none';
+}
+
+// Mantido para compatibilidade com salvarClassificacao / WhatsApp
+function calcPenClassif() { calcBica(); }
 function _getCertsClassif() {
   return Array.from(document.querySelectorAll('#clf-certs-wrap .cert-lb.on')).map(l => l.dataset.v).join(', ');
 }
@@ -5782,8 +5985,8 @@ function salvarClassificacaoWA() {
 //  FUNIL DE NEGOCIAÇÕES
 // ══════════════════════════════════════════════
 
-const NEG_COR   = { amostra:'#3B82F6', proposta:'#B45309', negociando:'#7C3AED', fechado:'var(--brand-primary)', recusou:'var(--t3)' };
-const NEG_LABEL = { amostra:'Amostra', proposta:'Proposta', negociando:'Negociando', fechado:'✓ Fechado', recusou:'Recusou' };
+const NEG_COR   = { amostra:'#3B82F6', proposta:'#B45309', negociando:'#7C3AED', comvoce:'#D97706', fechado:'var(--brand-primary)', recusou:'var(--t3)' };
+const NEG_LABEL = { amostra:'Ideia', proposta:'Oferta', negociando:'Contra-Oferta', comvoce:'Com Você! 🔥', fechado:'✓ Fechado', recusou:'Recusou' };
 const CORES_AV  = ['#2563EB','#7C3AED','#B45309','#DC2626','#059669','#0891B2','#92400E'];
 
 // Dados iniciais de demo
@@ -5866,13 +6069,13 @@ function _renderNegAcoes(id) {
 
   if (s === 'amostra') {
     html = `<div style="display:flex;gap:8px;width:100%">
-      ${btn('📋 Registrar proposta', primaryStyle, `_negAcao('${id}','proposta')`)}
+      ${btn('📋 Registrar oferta', primaryStyle, `_negAcao('${id}','proposta')`)}
       ${btn('✗ Recusou', dangerStyle, `_negAvancar('${id}','recusou','Recusou após amostra')`)}
     </div>`;
   } else if (s === 'proposta') {
     html = `<div style="display:flex;gap:8px;width:100%">
       ${btn('↩ Contra-oferta', secStyle, `_negAcao('${id}','contra')`)}
-      ${btn('🤝 Fechar', goldStyle, `_negAvancar('${id}','fechado','Negociação fechada')`)}
+      ${btn('✅ Com Você!', goldStyle, `_negAvancar('${id}','comvoce','Oferta enviada — aguardando resposta')`)}
     </div>
     <div style="display:flex;gap:8px;width:100%">
       ${btn('✗ Recusou', dangerStyle, `_negAvancar('${id}','recusou','Recusou por preço')`)}
@@ -5880,14 +6083,19 @@ function _renderNegAcoes(id) {
   } else if (s === 'negociando') {
     html = `<div style="display:flex;gap:8px;width:100%">
       ${btn('↩ Nova contra-oferta', secStyle, `_negAcao('${id}','contra')`)}
-      ${btn('🤝 Fechar negociação', goldStyle, `_negAvancar('${id}','fechado','Negociação fechada')`)}
+      ${btn('✅ Com Você!', goldStyle, `_negAvancar('${id}','comvoce','Contra-oferta enviada — aguardando resposta')`)}
     </div>
     <div style="display:flex;gap:8px;width:100%">
       ${btn('✗ Recusou', dangerStyle, `_negAvancar('${id}','recusou','Recusou')`)}
     </div>`;
+  } else if (s === 'comvoce') {
+    html = `<div style="display:flex;gap:8px;width:100%">
+      ${btn('🤝 Fechou! Gerar contrato', primaryStyle, `_negAvancar('${id}','fechado','Negociação fechada')`)}
+      ${btn('✗ Recusou', dangerStyle, `_negAvancar('${id}','recusou','Recusou na etapa final')`)}
+    </div>`;
   } else if (s === 'fechado') {
     html = `<div style="display:flex;gap:8px;width:100%">
-      ${btn('🤝 Registrar venda', primaryStyle, `_negIrVenda('${id}')`)}
+      ${btn('📄 Gerar Contrato', primaryStyle, `_negIrVenda('${id}')`)}
     </div>`;
   } else if (s === 'recusou') {
     html = `<div style="display:flex;gap:8px;width:100%">
@@ -5968,7 +6176,12 @@ function _negAvancar(id, novoStatus, textoLog) {
   _atualizarChipStatus(id);
   _renderNegHeat();
   _renderNegLista();
-  const labels = { fechado:'✓ Negociação fechada — pronto para registrar venda', recusou:'Marcado como recusou', amostra:'Contato reativado' };
+  const labels = {
+    comvoce: '🔥 Com Você! Oferta na mão do comprador',
+    fechado: '✓ Fechado! Toque em "Gerar Contrato" para formalizar',
+    recusou: 'Marcado como Recusou',
+    amostra: 'Contato reativado'
+  };
   toast(labels[novoStatus] || textoLog);
 }
 
@@ -5977,15 +6190,77 @@ function _negIrVenda(id) {
   if (!n) return;
   fecharNegDet();
   setTimeout(() => {
-    abrirVendaDoLote();
-    // pré-seleciona o comprador no form de venda
-    const selC = document.getElementById('venda-comprador');
-    if (selC) {
-      for (let i=0; i<selC.options.length; i++) {
-        if (selC.options[i].text.toLowerCase().includes(n.nome.toLowerCase().split(' ')[0])) {
-          selC.selectedIndex = i; break;
+    // Abre form de contrato (não o form de venda rápida)
+    abrirFormContrato();
+
+    // Pré-preenche comprador
+    const compSel = document.getElementById('ct-comprador');
+    if (compSel && n.nome) {
+      const nomeBusca = n.nome.toLowerCase().split(' ')[0];
+      for (let i = 0; i < compSel.options.length; i++) {
+        if (compSel.options[i].text.toLowerCase().includes(nomeBusca)) {
+          compSel.selectedIndex = i; break;
         }
       }
+    }
+
+    // Resolver lote via loteId rastreado na negociação (Link ID)
+    const loteRef = (n.loteId && window._lotesDB && window._lotesDB[n.loteId])
+      ? window._lotesDB[n.loteId]
+      : window._loteAtual;
+
+    if (loteRef) {
+      const vendSel = document.getElementById('ct-vendedor');
+      if (vendSel && loteRef.vendedor) {
+        const vendBusca = loteRef.vendedor.toLowerCase().split(' ')[0];
+        for (let i = 0; i < vendSel.options.length; i++) {
+          if (vendSel.options[i].text.toLowerCase().includes(vendBusca)) {
+            vendSel.selectedIndex = i; break;
+          }
+        }
+      }
+
+      // Sacas: usa o valor registrado na negociação (link ID), senão saldo do lote
+      const sacasEl = document.getElementById('ct-sacas');
+      if (sacasEl) {
+        const sacasVal = n.sacas || loteRef.sacasDisp || loteRef.disp || '';
+        sacasEl.value = sacasVal;
+        sacasEl.dispatchEvent(new Event('input'));
+      }
+
+      // Preço da negociação
+      if (n.preco) {
+        const precoEl = document.getElementById('ct-preco');
+        if (precoEl) { precoEl.value = n.preco; precoEl.dispatchEvent(new Event('input')); }
+      }
+
+      // Safra
+      const safraEl = document.getElementById('ct-safra');
+      if (safraEl && loteRef.safra) safraEl.value = loteRef.safra;
+
+      // Descrição automática a partir dos dados do lote
+      const descEl = document.getElementById('ct-descricao');
+      if (descEl) {
+        descEl.value = [loteRef.nome, loteRef.tipoCafe, loteRef.processamento, loteRef.origem].filter(Boolean).join(' · ');
+      }
+
+      // Lote cod no campo de Lote de origem (se existir no select)
+      if (n.loteCod) {
+        const loteSel = document.getElementById('ct-lote');
+        if (loteSel) {
+          for (let i = 0; i < loteSel.options.length; i++) {
+            if (loteSel.options[i].text.includes(n.loteCod)) {
+              loteSel.selectedIndex = i; break;
+            }
+          }
+        }
+      }
+    }
+
+    // Pré-preenche Nº Compra se a negociação tiver referência
+    if (n.numCompra) {
+      const ncEl = document.getElementById('ct-num-compra');
+      if (ncEl) ncEl.value = n.numCompra;
     }
   }, 250);
 }
@@ -6005,12 +6280,14 @@ function abrirNovaOfertaForm() {
   const el = document.getElementById('form-nova-oferta');
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
   if (el.style.display === 'block') {
-    // Pré-preencher sacas com total do lote (editável manualmente)
+    // Pré-preencher sacas com o SALDO DISPONÍVEL do lote (não o total)
     const sacasInput = document.getElementById('nof-sacas');
     if (sacasInput && window._loteAtual) {
-      const sacasTotal = window._loteAtual.sacasTotal || window._loteAtual.sacasDisp || '';
-      sacasInput.value = sacasTotal;
-      sacasInput.placeholder = 'Total: ' + sacasTotal + ' sc';
+      const disp = window._loteAtual.sacasDisp !== undefined && window._loteAtual.sacasDisp !== ''
+        ? window._loteAtual.sacasDisp
+        : (window._loteAtual.sacasTotal || '');
+      sacasInput.value = disp;
+      sacasInput.placeholder = 'Disponível: ' + disp + ' sc';
     }
     setTimeout(() => document.getElementById('nof-comprador').focus(), 50);
   }
@@ -6029,8 +6306,17 @@ function salvarNovaOferta() {
   const hoje   = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
   let texto = status === 'amostra' ? 'Amostra enviada' : 'Proposta: R$ ' + (preco ? parseFloat(preco).toLocaleString('pt-BR') + '/sc' : '—');
   if (sacas && status !== 'amostra') texto += ' · ' + sacas + ' sacas';
+  // Salvar loteId e sacas na negociação para rastreabilidade (Link ID)
+  const loteAtualId   = window._loteAtual ? window._loteAtual.id   : null;
+  const loteAtualCod  = window._loteAtual ? window._loteAtual.cod  : null;
+  const loteAtualNome = window._loteAtual ? window._loteAtual.nome : null;
   window._negociacoes[id] = {
     id, nome, iniciais, cor, status,
+    loteId:   loteAtualId,
+    loteCod:  loteAtualCod,
+    loteNome: loteAtualNome,
+    sacas:    sacas || (window._loteAtual ? window._loteAtual.sacasDisp : ''),
+    preco:    preco || '',
     historico:[{ tipo: status === 'amostra' ? 'amostra' : 'oferta', texto, data: hoje }]
   };
   document.getElementById('form-nova-oferta').style.display = 'none';
@@ -6461,9 +6747,15 @@ function fecharFormContrato() {
   const tit = document.querySelector('#form-contrato-overlay .m-t');
   if (tit) tit.textContent = '📄 Novo Contrato';
   window._editandoCtId = null;
-  // Limpar campos novos
-  ['ct-descricao','ct-safra','ct-obs-interna','ct-num-compra','ct-instrucao-fat'].forEach(id => {
+  // Limpar campos
+  ['ct-descricao','ct-safra','ct-obs-interna','ct-num-compra','ct-instrucao-fat','ct-obs','ct-sacas','ct-preco','ct-pagto-dias'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const diasRow = document.getElementById('ct-pagto-dias-row');
+  if (diasRow) diasRow.style.display = 'none';
+  // Reset selects
+  ['ct-comprador','ct-vendedor','ct-lote','ct-armazem-orig','ct-armazem'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.selectedIndex = 0;
   });
   const taxaComp = document.getElementById('ct-taxa-comp'); if (taxaComp) taxaComp.value = '0.5';
   const taxaVend = document.getElementById('ct-taxa-vend'); if (taxaVend) taxaVend.value = '0';
@@ -6500,7 +6792,11 @@ function salvarContrato() {
   const taxaComp   = parseFloat(document.getElementById('ct-taxa-comp').value) || 0;
   const taxaVend   = parseFloat(document.getElementById('ct-taxa-vend').value) || 0;
   const tipoOp     = document.querySelector('#ct-tipo-op .chip-sel.on')?.textContent.trim() || 'Compra e Venda';
-  const pagto      = document.querySelector('#ct-pagto .chip-sel.on')?.textContent.trim() || 'À vista';
+  const pagtoBase  = document.querySelector('#ct-pagto .chip-sel.on')?.textContent.trim() || 'À Vista';
+  const pagtoDias  = document.getElementById('ct-pagto-dias')?.value || '';
+  const pagto      = (pagtoBase === 'X Dias após descarga' && pagtoDias)
+    ? pagtoDias + ' dias após descarga'
+    : pagtoBase;
   const embalagem  = document.querySelector('#ct-embalagem .chip-sel.on')?.textContent.trim() || 'A Granel';
   const descricao  = document.getElementById('ct-descricao')?.value || '';
   const safra      = document.getElementById('ct-safra')?.value || '';
@@ -6591,21 +6887,19 @@ function salvarContrato() {
     }
   }
 
-  // Verificar saldo: se sacas vendidas < total do lote → criar lote saldo B
+  // Atualizar saldo do lote original (sem criar lote -B)
   const loteAtualParaSaldo = window._loteAtual && window._lotesDB[window._loteAtual.id];
   if (loteAtualParaSaldo) {
-    const sacasNum = parseFloat(sacas);
-    const saldo = loteAtualParaSaldo.disp - sacasNum;
-    if (saldo > 0) {
-      // Zerar original e criar lote B
-      loteAtualParaSaldo.disp   = 0;
+    const sacasNum = parseFloat(sacas) || 0;
+    const novoDisp = Math.max(0, loteAtualParaSaldo.disp - sacasNum);
+    loteAtualParaSaldo.disp = novoDisp;
+    loteAtualParaSaldo.sacasDisp = String(novoDisp);
+    if (novoDisp === 0) {
       loteAtualParaSaldo.status = 'fechado';
       _atualizarCardLote(window._loteAtual.id, 'fechado');
-      _criarLoteSaldo(loteAtualParaSaldo, saldo);
     } else {
-      loteAtualParaSaldo.disp   = 0;
-      loteAtualParaSaldo.status = 'fechado';
-      _atualizarCardLote(window._loteAtual.id, 'fechado');
+      // Saldo parcial: lote continua disponível com saldo atualizado
+      _atualizarCardLote(window._loteAtual.id, loteAtualParaSaldo.status || 'negoc');
     }
   }
 
@@ -6641,13 +6935,26 @@ function gerarEspelho(ctNumero, lado, evt) {
   const hoje     = new Date().toLocaleDateString('pt-BR');
   const mesRef   = new Date().toLocaleDateString('pt-BR', {month:'2-digit', year:'numeric'}).replace('/','/');
 
-  // Calcular encargos e líquido
+  // Calcular encargos e líquido (base, antes dos ajustes)
   const percEncargos = 14;
-  const encargos     = comissao * percEncargos / 100;
-  const liquido      = comissao - encargos;
 
-  // Montar modal de espelho
+  // Montar modal de espelho com campos editáveis de ajuste
   const espId = 'esp-' + Date.now();
+  const espIdAjuste = espId + '-aj';
+  const espIdPeso   = espId + '-dp';
+  const espIdResult = espId + '-result';
+
+  function _calcEspelho(ajusteVal, pesoVal) {
+    const ajuste  = parseFloat(ajusteVal) || 0;   // pode ser negativo
+    const descPeso = parseFloat(pesoVal)  || 0;   // sempre subtrai
+    const comissaoAjustada = Math.max(0, comissao + ajuste - descPeso);
+    const encargosAj = comissaoAjustada * percEncargos / 100;
+    const liquidoAj  = comissaoAjustada - encargosAj;
+    return { comissaoAjustada, encargosAj, liquidoAj };
+  }
+
+  const { comissaoAjustada, encargosAj, liquidoAj } = _calcEspelho(0, 0);
+
   const modal = document.createElement('div');
   modal.className = 'mov show';
   modal.id = espId;
@@ -6676,13 +6983,33 @@ function gerarEspelho(ctNumero, lado, evt) {
           <div class="ct-cell"><div class="ct-cell-v">R$ ${parseFloat(ct.preco).toLocaleString('pt-BR')}</div><div class="ct-cell-l">R$/sc</div></div>
         </div>
 
+        <div class="blk" style="margin-bottom:8px">Ajustes <span style="font-size:11px;font-weight:400;color:var(--t3)">(editável · recalcula automaticamente)</span></div>
+        <div style="background:var(--surface2);border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="color:var(--t2)">Ajuste por Qualidade (R$)</span>
+            <input id="${espIdAjuste}" type="number" step="0.01" placeholder="0,00" inputmode="decimal"
+              style="width:110px;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:700;text-align:right;background:var(--surface);color:var(--t1);font-family:var(--fb)"
+              oninput="_recalcEspelho('${espId}',${comissao})"
+              title="Valor positivo = bônus por qualidade · Negativo = desconto">
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="color:var(--t2)">Desconto de Peso (R$)</span>
+            <input id="${espIdPeso}" type="number" step="0.01" placeholder="0,00" inputmode="decimal"
+              style="width:110px;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:700;text-align:right;background:var(--surface);color:var(--t1);font-family:var(--fb)"
+              oninput="_recalcEspelho('${espId}',${comissao})"
+              title="Desconto aplicado por diferença de peso na balança">
+          </div>
+        </div>
+
         <div class="blk" style="margin-bottom:8px">Cálculo da Corretagem — ${lado === 'comp' ? 'Comprador' : 'Vendedor'}</div>
-        <div style="background:var(--surface2);border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:16px">
+        <div id="${espIdResult}" style="background:var(--surface2);border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:16px">
           <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--t2)">Valor total do contrato</span><span style="font-weight:700">R$ ${ct.totalNum.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>
           <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--t2)">Taxa de corretagem</span><span style="font-weight:700">${taxa}%</span></div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:8px;padding-top:8px;border-top:1px solid var(--bord)"><span style="color:var(--t2)">Valor bruto</span><span style="font-weight:700;color:var(--g-dark)">R$ ${comissao.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--t2)">Provisão encargos (${percEncargos}%)</span><span style="font-weight:700;color:var(--red)">− R$ ${encargos.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>
-          <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:2px solid var(--g-mid)"><span style="font-weight:800;color:var(--g-dark)">LÍQUIDO A RECEBER</span><span style="font-weight:800;font-size:16px;color:var(--g-dark);font-family:var(--fm)">R$ ${liquido.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;padding-top:8px;border-top:1px solid var(--bord)"><span style="color:var(--t2)">Valor bruto base</span><span style="font-weight:700;color:var(--g-dark)" id="${espId}-bruto">R$ ${comissao.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--t2)">Ajuste qualidade / peso</span><span style="font-weight:700;color:var(--t2)" id="${espId}-ajuste-linha">R$ 0,00</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="color:var(--t2);font-weight:700">Valor ajustado</span><span style="font-weight:700;color:var(--g-dark)" id="${espId}-ajustado">R$ ${comissaoAjustada.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="color:var(--t2)">Provisão encargos (${percEncargos}%)</span><span style="font-weight:700;color:var(--red)" id="${espId}-encargos">− R$ ${encargosAj.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>
+          <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:2px solid var(--g-mid)"><span style="font-weight:800;color:var(--g-dark)">LÍQUIDO A RECEBER</span><span style="font-weight:800;font-size:16px;color:var(--g-dark);font-family:var(--fm)" id="${espId}-liquido">R$ ${liquidoAj.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>
         </div>
 
         <div style="background:var(--gold-pale, #fffbeb);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--gold);font-weight:600;border:1px solid rgba(168,124,42,.2)">
@@ -6699,6 +7026,26 @@ function gerarEspelho(ctNumero, lado, evt) {
   modal.addEventListener('click', function(e) { if(e.target === modal) modal.remove(); });
   // Lançar no espelho tab
   _registrarEspelhoNaTab(ctNumero, parceiro, lado, comissao, liquido, mesRef);
+}
+
+function _recalcEspelho(espId, comissaoBase) {
+  const percEncargos = 14;
+  const ajuste   = parseFloat(document.getElementById(espId + '-aj')?.value) || 0;
+  const descPeso = parseFloat(document.getElementById(espId + '-dp')?.value) || 0;
+  const comissaoAjustada = Math.max(0, comissaoBase + ajuste - descPeso);
+  const encargosAj = comissaoAjustada * percEncargos / 100;
+  const liquidoAj  = comissaoAjustada - encargosAj;
+  const fmt = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2});
+  const ajusteLiq = ajuste - descPeso;
+  const ajusteStr = (ajusteLiq >= 0 ? '+' : '−') + ' ' + fmt(Math.abs(ajusteLiq));
+  const aj = document.getElementById(espId + '-ajuste-linha');
+  const ad = document.getElementById(espId + '-ajustado');
+  const en = document.getElementById(espId + '-encargos');
+  const lq = document.getElementById(espId + '-liquido');
+  if (aj) aj.textContent = ajusteStr;
+  if (ad) ad.textContent = fmt(comissaoAjustada);
+  if (en) en.textContent = '− ' + fmt(encargosAj);
+  if (lq) lq.textContent = fmt(liquidoAj);
 }
 
 function _registrarEspelhoNaTab(ctNumero, parceiro, lado, bruto, liquido, mesRef) {
@@ -6810,6 +7157,10 @@ function salvarVenda() {
 
     // Atualizar ciclo banner
     if (loteDB) {
+      // _ajustarSacasLote atualiza _loteAtual.sacasDisp mas não loteDB.disp — sincronizar
+      loteDB.disp = typeof window._loteAtual.sacasDisp === 'number'
+        ? window._loteAtual.sacasDisp
+        : Math.max(0, (loteDB.disp || 0) - sacas);
       const saldoApos = loteDB.disp;
 
       if (saldoApos === 0) {
@@ -6825,14 +7176,16 @@ function salvarVenda() {
         }, 300);
         return;
       } else {
-        // VENDA PARCIAL: fechar este lote + criar lote saldo B
-        loteDB.status = 'fechado';
-        loteDB.disp   = 0;
-        _atualizarCardLote(lote.id, 'fechado');
+        // VENDA PARCIAL: abater saldo no lote original, não criar lote -B
+        loteDB.disp = saldoApos;
+        loteDB.sacasDisp = String(saldoApos);
+        loteDB.status = 'negoc';
+        _atualizarCardLote(lote.id, 'negoc');
         _atualizarCicloBanner(loteDB);
         _gerarContratoAuto(lote, comprador, sacas, precoFmt, total, preco);
-        // Criar lote saldo
-        _criarLoteSaldo(loteDB, saldoApos);
+        const agora2 = new Date();
+        const ts2 = agora2.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + ' · ' + agora2.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+        _pushHistorico(lote.id, 'o', 'Venda parcial — ' + sacas + ' sc', 'Saldo restante: ' + saldoApos + ' sc · lote continua disponível', ts2);
       }
     }
   }
@@ -7001,29 +7354,45 @@ function _renderAmostras(loteId) {
   }
 
   const statusInfo = {
-    'EM_CAMPO':  { cls: 'enviada',   label: 'Enviada'         },
-    'COM_ORDEM': { cls: 'com-ordem', label: '⚡ Preço comigo' },
-    'UTILIZADA': { cls: 'utilizada', label: '✅ Utilizada'    },
-    'DEVOLVIDA': { cls: 'enviada',   label: 'Devolvida'       },
-    'BLOQUEADA': { cls: 'bloqueada', label: 'Sobra'           },
+    'EM_CAMPO':  { cls: 'enviada',   label: '🔍 Em Análise'   },
+    'COM_ORDEM': { cls: 'com-ordem', label: '⚡ Tem Interesse' },
+    'UTILIZADA': { cls: 'utilizada', label: '✅ Fechado'       },
+    'DEVOLVIDA': { cls: 'bloqueada', label: '❌ Rejeitada'     },
+    'BLOQUEADA': { cls: 'bloqueada', label: 'Sobra'            },
   };
 
   const rows = amostras.map(a => {
     const si = statusInfo[a.status] || statusInfo['EM_CAMPO'];
-    const isAtiva = a.status === 'EM_CAMPO' || a.status === 'COM_ORDEM';
-    const rowCls = a.status === 'BLOQUEADA' ? 'amostra-row bloqueada' : a.status === 'UTILIZADA' ? 'amostra-row utilizada' : 'amostra-row';
-    const det = [a.peso, a.data ? 'enviada em ' + a.data : null, a.armazem].filter(Boolean).join(' · ');
+    const isEmCampo   = a.status === 'EM_CAMPO';
+    const isComOrdem  = a.status === 'COM_ORDEM';
+    const rowCls = (a.status === 'BLOQUEADA' || a.status === 'DEVOLVIDA') ? 'amostra-row bloqueada' : a.status === 'UTILIZADA' ? 'amostra-row utilizada' : 'amostra-row';
+    const tipoIco = a.tipo === 'descricao' ? '💬' : '🧪';
+    const det = [a.sacas ? a.sacas + ' sc' : null, a.peso, a.data ? 'enviada ' + a.data : null].filter(Boolean).join(' · ');
     const precoHtml = a.preco ? `<div style="font-size:11px;color:var(--g-mid);font-weight:700;margin-top:2px">R$ ${parseFloat(a.preco).toLocaleString('pt-BR')}/sc</div>` : '';
-    const btnFechar = isAtiva ? `<button class="btn-fechar-amostra" onclick="fecharAmostra('${loteId}','${a.id}',event)">Fechar</button>` : '';
-    return `<div class="${rowCls}">
-      <div class="amostra-ic">🧪</div>
-      <div class="amostra-info">
-        <div class="amostra-dest">${a.comprador}</div>
-        <div class="amostra-det">${det}</div>
-        ${precoHtml}
+    // Botões de ação por status
+    var btns = '';
+    if (isEmCampo) {
+      btns = `<div style="display:flex;gap:6px;margin-top:8px">
+        <button onclick="aprovarAmostra('${loteId}','${a.id}',event)" style="flex:1;padding:7px 8px;background:var(--g-pale);border:1.5px solid var(--g-light);border-radius:8px;font-size:11px;font-weight:700;color:var(--g-mid);cursor:pointer;font-family:var(--fb)">✅ Tem interesse</button>
+        <button onclick="rejeitarAmostra('${loteId}','${a.id}',event)" style="flex:1;padding:7px 8px;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;font-size:11px;font-weight:700;color:var(--t2);cursor:pointer;font-family:var(--fb)">❌ Rejeitada</button>
+      </div>`;
+    } else if (isComOrdem) {
+      btns = `<div style="margin-top:6px;background:var(--g-pale);border-radius:8px;padding:7px 10px;font-size:11px;color:var(--g-mid);font-weight:600">
+        📋 Em negociação · para fechar, acesse a aba <strong>Negociações</strong>
+      </div>`;
+    }
+    return `<div class="${rowCls}" style="padding:12px 0">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <div class="amostra-ic">${tipoIco}</div>
+        <div class="amostra-info" style="flex:1">
+          <div class="amostra-dest">${a.comprador}</div>
+          <div class="amostra-det">${det}</div>
+          ${precoHtml}
+          ${a.obs ? `<div style="font-size:11px;color:var(--t3);margin-top:2px;line-height:1.4">${a.obs}</div>` : ''}
+        </div>
+        <span class="amostra-chip ${si.cls}">${si.label}</span>
       </div>
-      <span class="amostra-chip ${si.cls}">${si.label}</span>
-      ${btnFechar}
+      ${btns}
     </div>`;
   }).join('');
 
@@ -7062,6 +7431,60 @@ function fecharAmostra(loteId, amostraId, evt) {
 
   // Abrir form de contrato pré-preenchido
   abrirFormContratoFechamento({ loteId, amostra: alvo, lote });
+}
+
+// ── Aprovar amostra: muda para COM_ORDEM e migra para Negociações ──
+function aprovarAmostra(loteId, amostraId, evt) {
+  if (evt) evt.stopPropagation();
+  if (!window._amostrasDB || !window._amostrasDB[loteId]) return;
+  const amostras = window._amostrasDB[loteId];
+  const alvo = amostras.find(a => a.id === amostraId);
+  if (!alvo) return;
+  alvo.status = 'COM_ORDEM';
+
+  // Migrar para Negociações
+  if (!window._negociacoesDB) window._negociacoesDB = {};
+  if (!window._negociacoesDB[loteId]) window._negociacoesDB[loteId] = {};
+  const negId  = 'n' + Date.now();
+  const hoje   = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const cor    = CORES_AV[Object.keys(window._negociacoesDB[loteId]).length % CORES_AV.length];
+  const texto  = 'Amostra aprovada — aguardando proposta de preço';
+  window._negociacoesDB[loteId][negId] = {
+    id: negId,
+    nome: alvo.comprador,
+    iniciais: _negSigla(alvo.comprador),
+    cor,
+    status: 'proposta',
+    historico: [
+      { tipo: 'amostra', texto: 'Amostra enviada', data: alvo.data || hoje },
+      { tipo: 'proposta', texto, data: hoje }
+    ]
+  };
+  // Se é o lote aberto, sincroniza a instância ativa também
+  if (window._loteAtual && window._loteAtual.id === loteId) {
+    window._negociacoes = window._negociacoesDB[loteId];
+    _renderNegHeat();
+    _renderNegLista();
+  }
+
+  const ts = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + ' · ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  _pushHistorico(loteId, 'b', 'Interesse confirmado — ' + alvo.comprador, 'Negociação criada automaticamente na aba Negociações', ts);
+  _renderAmostras(loteId);
+  toast('✅ ' + alvo.comprador + ' tem interesse — negociação aberta na aba Negociações');
+}
+
+// ── Rejeitar amostra: muda para DEVOLVIDA com histórico ──
+function rejeitarAmostra(loteId, amostraId, evt) {
+  if (evt) evt.stopPropagation();
+  if (!window._amostrasDB || !window._amostrasDB[loteId]) return;
+  const amostras = window._amostrasDB[loteId];
+  const alvo = amostras.find(a => a.id === amostraId);
+  if (!alvo) return;
+  alvo.status = 'DEVOLVIDA';
+  const ts = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + ' · ' + new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  _pushHistorico(loteId, 'r', 'Rejeitado — ' + alvo.comprador, 'Amostra recusada · histórico registrado · ciclo continua', ts);
+  _renderAmostras(loteId);
+  toast('📋 ' + alvo.comprador + ' rejeitou — histórico salvo, ciclo continua');
 }
 
 function abrirFormContratoFechamento(dados) {
@@ -7245,6 +7668,12 @@ function abrirFormAmostra() {
   // data padrão = hoje
   const hoje = new Date().toISOString().slice(0,10);
   document.getElementById('amostra-data').value = hoje;
+  // Autofill sacas com saldo disponível do lote atual
+  const sacasEl = document.getElementById('amostra-sacas');
+  if (sacasEl && window._loteAtual) {
+    const disp = window._loteAtual.sacasDisp || window._loteAtual.sacasTotal || '';
+    sacasEl.value = disp;
+  }
   document.getElementById('form-amostra-overlay').classList.add('show');
   document.getElementById('amostra-comprador').focus();
 }
@@ -7274,6 +7703,7 @@ function salvarAmostra() {
   const tipo     = tipoEl?.dataset.tipo === 'fisica' ? 'Amostra física' : 'Descrição';
   const statusTx = statusEl?.dataset.status || 'Enviada';
   const peso     = tipoEl?.dataset.tipo === 'fisica' ? document.getElementById('amostra-peso').value : null;
+  const sacas    = document.getElementById('amostra-sacas')?.value.trim() || '';
   const preco    = document.getElementById('amostra-preco').value;
   const dataVal  = document.getElementById('amostra-data').value;
   const dataFmt  = dataVal ? new Date(dataVal + 'T12:00:00').toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'}) : 'hoje';
@@ -7292,7 +7722,7 @@ function salvarAmostra() {
     if (!window._amostrasDB[loteId]) window._amostrasDB[loteId] = [];
     window._amostrasDB[loteId].unshift({
       id: uid, comprador, tipo, peso: peso || null,
-      data: dataFmt, armazem: null,
+      sacas: sacas || null, data: dataFmt, armazem: null,
       preco: preco || null, status: statusInterno
     });
     _renderAmostras(loteId);
@@ -7324,6 +7754,7 @@ function limparFormAmostra() {
   document.getElementById('amostra-comprador').selectedIndex = 0;
   document.getElementById('amostra-preco').value = '';
   document.getElementById('amostra-obs').value = '';
+  const sacasEl = document.getElementById('amostra-sacas'); if (sacasEl) sacasEl.value = '';
   document.getElementById('amostra-peso').value = '250g';
   document.querySelectorAll('#amostra-tipo-chips .chip-sel').forEach((c,i) => c.classList.toggle('on', i===0));
   document.querySelectorAll('#amostra-status-chips .chip-sel').forEach((c,i) => c.classList.toggle('on', i===0));
@@ -7716,9 +8147,9 @@ const MS_WARN = msg => ({ s:'warn', m: msg||'Atenção' });
 
 const MS_SUITES = [
   { lbl:'1. Inicialização', testes:[
-    { n:'_lotesDB existe com ≥4 lotes',      fn:()=>{ const d=window._lotesDB; return d&&Object.keys(d).length>=4?MS_OK(Object.keys(d).length+' lotes'):MS_FAIL('_lotesDB tem '+(d?Object.keys(d).length:0)) } },
-    { n:'_amostrasDB existe com demo',        fn:()=>window._amostrasDB&&window._amostrasDB['lot001']?MS_OK('lot001='+window._amostrasDB['lot001'].length+' am.'):MS_FAIL('_amostrasDB ausente') },
-    { n:'_negociacoesDB existe por lote',     fn:()=>window._negociacoesDB&&window._negociacoesDB['lot001']?MS_OK(Object.keys(window._negociacoesDB['lot001']).length+' neg.'):MS_FAIL('_negociacoesDB ausente') },
+    { n:'_lotesDB existe (objeto)',           fn:()=>{ const d=window._lotesDB; return d&&typeof d==='object'?MS_OK(Object.keys(d).length+' lotes'):MS_FAIL('_lotesDB ausente') } },
+    { n:'_amostrasDB[lot001] injetado pelo runner', fn:()=>window._amostrasDB&&window._amostrasDB['lot001']?MS_OK('lot001='+window._amostrasDB['lot001'].length+' am.'):MS_FAIL('fixture não criada') },
+    { n:'_negociacoesDB[lot001] injetado',   fn:()=>window._negociacoesDB&&window._negociacoesDB['lot001']?MS_OK(Object.keys(window._negociacoesDB['lot001']).length+' neg.'):MS_FAIL('fixture não criada') },
     { n:'_historicoDB existe',               fn:()=>typeof window._historicoDB!=='undefined'?MS_OK():MS_FAIL('não definido') },
     { n:'contratoCounter inicializado',      fn:()=>typeof window.contratoCounter!=='undefined'?MS_OK('='+window.contratoCounter):MS_FAIL('não definido') },
   ]},
@@ -7742,7 +8173,7 @@ const MS_SUITES = [
     { n:'lot003 amostras = [] (vazio)',      fn:()=>{ const a=window._amostrasDB&&window._amostrasDB['lot003']; return Array.isArray(a)&&a.length===0?MS_OK('vazio ✓'):MS_FAIL('lot003: '+JSON.stringify(a)) } },
     { n:'#amostras-lista-render existe',     fn:()=>document.getElementById('amostras-lista-render')?MS_OK():MS_FAIL('elemento ausente no DOM') },
     { n:'render popula container após abrir lote', fn:()=>{ try{abrirLoteDetalhe('lot001');const el=document.getElementById('amostras-lista-render');return el&&el.querySelectorAll('.amostra-row').length>0?MS_OK(el.querySelectorAll('.amostra-row').length+' linhas'):MS_FAIL('container vazio')}catch(e){return MS_FAIL(e.message)} } },
-    { n:'botão "Fechar" aparece em ativa',   fn:()=>{ try{abrirLoteDetalhe('lot001');const b=document.querySelectorAll('.btn-fechar-amostra');return b.length>0?MS_OK(b.length+' botão(ões)'):MS_FAIL('nenhum botão Fechar')}catch(e){return MS_FAIL(e.message)} } },
+    { n:'botão "Tem interesse" aparece em EM_CAMPO', fn:()=>{ try{abrirLoteDetalhe('lot001');const b=document.querySelector('button[onclick*="aprovarAmostra"]');return b?MS_OK('botão encontrado'):MS_FAIL('nenhum botão Tem interesse')}catch(e){return MS_FAIL(e.message)} } },
   ]},
   { lbl:'5. fecharAmostra — Ciclo', testes:[
     { n:'fecharAmostra() existe',            fn:()=>typeof fecharAmostra==='function'?MS_OK():MS_FAIL('ausente') },
@@ -7803,12 +8234,45 @@ const MS_SUITES = [
   ]},
 ];
 
+// ── Setup de fixtures para o test runner (app limpo) ──────────────
+function _setupTestFixtures() {
+  // Lote 001 — principal de testes (300 sacas, em negociação)
+  window._lotesDB['lot001'] = {
+    id:'lot001', cod:'001/26', nome:'Fazenda Boa Vista', vendedor:'CAFESALL',
+    origem:'COCATREL — Três Pontas', total:300, disp:300, sacasDisp:'300',
+    safra:'25/26', status:'negoc', tipoCafe:'Arábica', processo:'Natural',
+    obs:'Lote de teste', certs:''
+  };
+  // Lote 003 — deve ter amostras vazias
+  window._lotesDB['lot003'] = {
+    id:'lot003', cod:'003/26', nome:'Fazenda Serra Verde', vendedor:'MONTE SANTO',
+    origem:'MONTE SANTO — Campanha', total:500, disp:500, sacasDisp:'500',
+    safra:'25/26', status:'disp', tipoCafe:'Arábica', processo:'Natural',
+    obs:'', certs:''
+  };
+  // Amostras lot001 — com COM_ORDEM e EM_CAMPO para testar ciclo
+  window._amostrasDB['lot001'] = [
+    { id:'am001-1', comprador:'Legender Coffees', status:'COM_ORDEM', peso:'250g', data:'01/04', preco:'1840', obs:'', tipo:'fisica' },
+    { id:'am001-2', comprador:'Carmo Coffees',    status:'EM_CAMPO',  peso:'250g', data:'28/03', preco:'1820', obs:'', tipo:'fisica' },
+    { id:'am001-3', comprador:'Cocatrel',         status:'EM_CAMPO',  peso:'250g', data:'25/03', preco:'1800', obs:'', tipo:'fisica' },
+  ];
+  // Amostras lot003 — vazio (novo lote)
+  window._amostrasDB['lot003'] = [];
+  // Negociações lot001 — ≥3 para os testes
+  window._negociacoesDB['lot001'] = {
+    'n-t1':{ id:'n-t1', nome:'Legender Coffees', iniciais:'LC', cor:'#2563EB', status:'fechado',   historico:[] },
+    'n-t2':{ id:'n-t2', nome:'Carmo Coffees',    iniciais:'CC', cor:'#7C3AED', status:'proposta',  historico:[] },
+    'n-t3':{ id:'n-t3', nome:'Moinho Trade',     iniciais:'MT', cor:'#B45309', status:'negociando',historico:[] },
+  };
+}
+
 async function msRunAll() {
   const body  = document.getElementById('ms-test-body');
   const btn   = document.getElementById('ms-run-btn');
   btn.disabled = true; btn.textContent = '⏳';
   body.innerHTML = '';
   msLog('▶ Iniciando…','i');
+  _setupTestFixtures(); // garante fixtures mesmo com app limpo
 
   let pass=0,fail=0,warn=0;
   const allItems = [];
